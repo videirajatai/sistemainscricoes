@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-encontrista: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+            --bg-servo: linear-gradient(160deg, #0d1b1e 0%, #152a2d 100%);
+            --accent-encontrista: #4834d4;
+            --accent-servo: #20bf6b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #2c3e50; padding: 20px; }
+
+        .controls {
+            background: rgba(0,0,0,0.8); padding: 15px 30px; border-radius: 50px; margin: 0 auto 30px auto;
+            display: flex; gap: 20px; align-items: center; justify-content: center;
+            max-width: 700px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        }
+        select {
+            padding: 10px 15px; border-radius: 8px; border: 1px solid #444; 
+            background: #111; color: white; font-weight: 600;
+        }
+        .btn-print {
+            padding: 10px 25px; background: white; color: black; border: none; 
+            border-radius: 25px; font-weight: 800; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* --- FOLHA A4 --- */
+        .a4-page {
+            width: 210mm; height: 296mm; background: white; margin: 0 auto;
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+            page-break-after: always;
+        }
+
+        .badge {
+            width: 105mm; height: 148mm; position: relative;
+            display: flex; flex-direction: column; overflow: hidden; color: white;
+            /* BORDAS DE CORTE PRETAS E MAIS GROSSAS */
+            border: 1mm solid #000000; 
+        }
+
+        /* Estilos de Fundo */
+        .badge.encontrista { background: var(--bg-encontrista); }
+        .badge.servo { background: var(--bg-servo); }
+
+        /* Brilho atrás da Logo */
+        .logo-container {
+            position: relative; padding: 50px 0 20px 0; display: flex; justify-content: center; z-index: 2;
+        }
+        .logo-glow {
+            position: absolute; width: 150px; height: 150px; top: 10px;
+            border-radius: 50%; filter: blur(40px); opacity: 0.4; z-index: -1;
+        }
+        .encontrista .logo-glow { background: var(--accent-encontrista); }
+        .servo .logo-glow { background: var(--accent-servo); }
+
+        .logo { width: 90px; height: 90px; object-fit: contain; z-index: 3; }
+
+        .main-content {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; text-align: center; padding: 0 30px; z-index: 2;
+        }
+        .event-name {
+            font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 6px;
+            text-transform: uppercase; margin-bottom: 40px; color: rgba(255,255,255,0.6);
+        }
+        .first-name {
+            font-size: 54px; font-weight: 900; line-height: 1; 
+            letter-spacing: -2px; margin-bottom: 10px;
+        }
+        .last-name {
+            font-size: 8px; font-weight: 400; text-transform: uppercase; 
+            letter-spacing: 5px; color: rgba(255,255,255,0.7);
+        }
+
+        .side-bar {
+            position: absolute; left: 0; top: 0; width: 6px; height: 100%;
+        }
+        .encontrista .side-bar { background: var(--accent-encontrista); }
+        .servo .side-bar { background: var(--accent-servo); }
+
+        .footer {
+            padding: 30px; text-align: center; position: relative; z-index: 2;
+        }
+        .category-label {
+            display: inline-block; padding: 8px 30px; border-radius: 50px;
+            font-weight: 900; font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);
+        }
+
+        .punch {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            width: 30px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .controls { display: none; }
+            /* Força a borda preta na impressão */
+            .badge { border: 1mm solid #000 !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <select id="select-evento" onchange="carregarInscritos()">
+            <option value="">Carregando eventos...</option>
+        </select>
+        
+        <select id="filtroTipo" onchange="filtrar()">
+            <option value="todos">Todos</option>
+            <option value="Encontrista">Encontristas</option>
+            <option value="Servo">Servos</option>
+        </select>
+        <button class="btn-print" onclick="window.print()">Gerar Impressão</button>
+    </div>
+
+    <div id="container-folhas"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // === CONFIGURAÇÃO DO SUPABASE ===
+        const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
+        const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let participantes = [];
+        let eventosGlobais = [];
+        // Mantive a sua logo como fallback caso o evento não tenha logo cadastrada
+        let logoUrl = "https://static.wixstatic.com/media/450325_bbfec91fada44fa18712d8a13a0d4a89~mv2.png/v1/fill/w_175,h_175,al_c,lg_1,q_85,enc_avif,quality_auto/logo_rodape.png";
+        let nomeEvento = "Carregando...";
+
+        // Inicialização
+        window.onload = async () => {
+            const { data, error } = await supabaseClient.from('eventos').select('*').order('id', { ascending: false });
+            const selectEvento = document.getElementById('select-evento');
+            
+            if (error || !data || data.length === 0) {
+                selectEvento.innerHTML = '<option value="">Nenhum evento</option>';
+                return;
+            }
+
+            eventosGlobais = data;
+            selectEvento.innerHTML = '';
+            data.forEach(ev => {
+                selectEvento.innerHTML += `<option value="${ev.id}">${ev.nome_evento}</option>`;
+            });
+
+            await carregarInscritos();
+        };
+
+        // Carrega os inscritos do evento selecionado
+        async function carregarInscritos() {
+            const eventoId = document.getElementById('select-evento').value;
+            const evento = eventosGlobais.find(e => e.id == eventoId);
+            
+            if(evento) {
+                nomeEvento = evento.nome_evento;
+                if(evento.logo_url) logoUrl = evento.logo_url; // Puxa a logo do banco
+            }
+
+            // Puxa apenas as inscrições Aprovadas do evento, em ordem alfabética
+            const { data, error } = await supabaseClient
+                .from('inscricoes')
+                .select('*')
+                .eq('evento_id', eventoId)
+                .eq('status_pagamento', 'Aprovado')
+                .order('nome_completo', { ascending: true });
+
+            if (error) {
+                console.error("Erro ao puxar inscritos:", error);
+                return;
+            }
+
+            // Mapeia os dados do Supabase para o formato exato que a sua função original já usa
+            participantes = data.map(inscrito => ({
+                nome: inscrito.nome_completo,
+                tipo: inscrito.tipo_inscricao
+            }));
+
+            filtrar();
+        }
+
+        // =====================================================================
+        // AS FUNÇÕES ABAIXO FORAM MANTIDAS 100% INTACTAS, COMO VOCÊ PEDIU
+        // =====================================================================
+        function filtrar() {
+            const tipo = document.getElementById('filtroTipo').value;
+            const filtrados = tipo === 'todos' ? 
+                participantes : 
+                participantes.filter(p => p.tipo.trim().toLowerCase() === tipo.trim().toLowerCase());
+            renderizar(filtrados);
+        }
+
+        function renderizar(lista) {
+            const container = document.getElementById('container-folhas');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < lista.length; i += 4) {
+                const grupo = lista.slice(i, i + 4);
+                const folha = document.createElement('div');
+                folha.className = 'a4-page';
+                
+                grupo.forEach(p => {
+                    const nomeParts = p.nome.trim().split(' ');
+                    const firstName = nomeParts[0].toUpperCase();
+                    const lastName = nomeParts.slice(1, 5).join(' ');
+                    const tipoLow = p.tipo.trim().toLowerCase();
+
+                    folha.innerHTML += `
+                        <div class="badge ${tipoLow}">
+                            <div class="side-bar"></div>
+                            <div class="punch"></div>
+                            
+                            <div class="logo-container">
+                                <div class="logo-glow"></div>
+                                <img src="${logoUrl}" class="logo">
+                            </div>
+
+                            <div class="main-content">
+                                <div class="event-name">${nomeEvento}</div><br>
+                                <div class="first-name">${firstName}</div>
+                                <div class="last-name">${lastName}</div>
+                            </div>
+
+                            <div class="footer">
+                                <div class="category-label">${p.tipo}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.appendChild(folha);
+            }
+        }
+    </script>
+</body>
+</html>
