@@ -295,30 +295,77 @@
                     .from('comprovantes')
                     .getPublicUrl(fileName);
 
-                // 3. Salvar os dados na tabela 'inscricoes' (AGORA INCLUINDO O EVENTO_ID)
-                const { error: insertError } = await supabaseClient
+// ... (código anterior que salva no Supabase e pega publicUrlData)
+
+                // 2. Salvar os dados e PEDIR O ID DE VOLTA (.select())
+                const { data: insertData, error: insertError } = await supabaseClient
                     .from('inscricoes')
                     .insert([
                         {
-                            evento_id: eventoIdGlobal, // <--- Conectando a inscrição ao evento!
-                            nome_completo: formData.get('nomeCompleto'),
+                            evento_id: eventoIdGlobal,
+                            nome_completo: nomeDigitado,
                             telefone: formData.get('telefone'),
                             email: email,
                             tipo_inscricao: formData.get('tipoInscricao'),
                             comprovante_url: publicUrlData.publicUrl
                         }
-                    ]);
+                    ])
+                    .select();
 
                 if (insertError) throw new Error("Erro ao salvar dados da inscrição no banco.");
 
-                // Sucesso
+                const novoInscritoId = insertData[0].id;
+
+                // 3. Gerar o Link de Check-in e o QR Code
+                let urlBase = window.location.href.split('index.html')[0];
+                if (!urlBase.endsWith('/')) urlBase += '/';
+                const linkCheckin = `${urlBase}checkin.html?id=${novoInscritoId}`;
+                const qrCodeImagemUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(linkCheckin)}`;
+
+                // ==============================================================
+                // 4. DISPARAR O E-MAIL USANDO O GOOGLE APPS SCRIPT
+                // ==============================================================
+                const googleScriptURL = 'https://script.google.com/macros/s/AKfycbyo02o-gqKp1OBLAICDdwFhpFp3TcJ88C7lREKFSziIWwaeWE72Pn-HRuH5LAXxwKEm3Q/exec';
+                
+                // Monta o "pacote" com os textos que estão soltos pela tela
+                const dadosEmail = {
+                    nome: nomeDigitado,
+                    email: email,
+                    nomeEvento: document.getElementById('cfg-nome-evento').innerText,
+                    dataEvento: document.getElementById('cfg-data').innerText.replace('📅', '').trim(),
+                    horaEvento: document.getElementById('cfg-horario').innerText.replace('⏰', '').trim(),
+                    localEvento: document.getElementById('cfg-local').innerText.replace('📍', '').trim(),
+                    qrCodeUrl: qrCodeImagemUrl,
+                    inscricaoId: novoInscritoId.substring(0,8).toUpperCase(),
+                    logoUrl: document.getElementById('cfg-logo').src
+                };
+
+                // Envia para o Google Script em segundo plano (sem travar a tela)
+                fetch(googleScriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(dadosEmail),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // text/plain evita bloqueios de CORS do navegador
+                }).catch(err => console.error("Erro no envio do e-mail:", err));
+                // ==============================================================
+
+                // 5. Mostrar o Comprovante na Tela do usuário
                 msg.className = 'msg success';
-                msg.innerHTML = '✅ <b>Sucesso!</b><br>Sua inscrição foi recebida com sucesso.';
+                msg.innerHTML = `
+                    <h3 style="margin-bottom: 10px; color: #155724;">✅ Inscrição Recebida!</h3>
+                    <p style="margin-bottom: 20px;">O seu ingresso com QR Code foi enviado para o seu e-mail!</p>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 12px; border: 2px dashed var(--primary); display: inline-block;">
+                        <h4 style="margin-bottom: 5px; color: #333;">${nomeDigitado}</h4>
+                        <p style="font-size: 0.8em; color: #777; margin-bottom: 15px;">ID: ${novoInscritoId.substring(0,8).toUpperCase()}</p>
+                        <img src="${qrCodeImagemUrl}" alt="QR Code Check-in" style="width: 180px; height: 180px; border-radius: 8px;">
+                    </div>
+                `;
                 msg.style.display = 'block';
                 
                 document.getElementById('form').style.display = 'none';
                 document.getElementById('new-btn').style.display = 'block';
                 msg.scrollIntoView({behavior: "smooth"});
+
 
             } catch (erro) {
                 btn.disabled = false;
