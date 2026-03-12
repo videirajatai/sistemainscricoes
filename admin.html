@@ -12,245 +12,131 @@
         /* --- RESET & BASE --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
-            background-color: #0f172a; /* Slate 900 */
-            color: #f1f5f9; /* Slate 100 */
+            background-color: #0f172a; 
+            color: #f1f5f9; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px 16px;
+            padding: 0; /* Zerado no body, adicionado no main-content */
         }
+
+        /* --- TELA DE LOGIN --- */
+        #login-screen {
+            position: fixed; inset: 0; background-color: #0f172a; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
+        }
+        .login-box {
+            background: #1e293b; padding: 40px 30px; border-radius: 16px; border: 1px solid #334155;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 350px;
+        }
+        .login-box h2 { margin: 0 0 20px 0; color: #f8fafc; font-size: 1.5rem; }
+        .login-box input {
+            width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155;
+            background: #0f172a; color: white; font-size: 1.2rem; text-align: center; margin-bottom: 20px; outline: none;
+        }
+        .login-box input:focus { border-color: #3b82f6; }
+        .login-box button {
+            width: 100%; padding: 15px; border-radius: 8px; border: none; background: #3b82f6;
+            color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .login-box button:active { transform: scale(0.98); background: #2563eb; }
+        #login-erro { color: #ef4444; font-size: 0.9rem; margin-top: 15px; display: none; font-weight: bold; }
+
+        /* --- CONTEUDO PRINCIPAL (Escondido inicialmente) --- */
+        #main-content { display: none; padding: 20px 16px; }
 
         /* --- HEADER --- */
         .header { text-align: center; margin-bottom: 25px; }
-        .header img { 
-            height: 60px; 
-            width: auto; 
-            object-fit: contain; 
-            margin-bottom: 10px; 
-            display: none; /* Escondido até carregar */
-        }
-        .header h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: #e2e8f0;
-            margin: 0 0 15px 0;
-            text-transform: uppercase;
-        }
+        .header img { height: 60px; width: auto; object-fit: contain; margin-bottom: 10px; display: none; }
+        .header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 1px; color: #e2e8f0; margin: 0 0 15px 0; text-transform: uppercase; }
 
-        /* --- SELETOR DE EVENTO --- */
-        .event-selector {
-            width: 100%;
-            padding: 12px;
-            background: #1e293b;
-            color: white;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-bottom: 20px;
-            outline: none;
-        }
+        .event-selector { width: 100%; padding: 12px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; font-size: 1rem; margin-bottom: 20px; outline: none; }
 
         /* --- STATS DASHBOARD --- */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: #1e293b; /* Slate 800 */
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #94a3b8;
-            letter-spacing: 0.5px;
-        }
-        .text-total { color: #f8fafc; }
-        .text-encontristas { color: #c084fc; } 
-        .text-servos { color: #60a5fa; } 
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: #1e293b; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .stat-value { font-size: 1.5rem; font-weight: 800; display: block; margin-bottom: 4px; }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; }
+        .text-total { color: #f8fafc; } .text-encontristas { color: #c084fc; } .text-servos { color: #60a5fa; } 
 
         /* --- FILTERS --- */
-        .filters {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 5px; 
-            scrollbar-width: none; 
-        }
+        .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .filters::-webkit-scrollbar { display: none; } 
-        
-        .btn-filter {
-            flex: 1;
-            white-space: nowrap;
-            padding: 10px 16px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            color: #94a3b8;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-filter.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
+        .btn-filter { flex: 1; white-space: nowrap; padding: 10px 16px; background: #1e293b; border: 1px solid #334155; color: #94a3b8; border-radius: 50px; font-size: 0.875rem; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s ease; }
+        .btn-filter.active { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
 
         /* --- CARDS LIST --- */
-        .card {
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            position: relative;
-            border: 1px solid #334155;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 16px; bottom: 16px;
-            width: 4px;
-            border-radius: 0 4px 4px 0;
-            background-color: #fbbf24; /* Amarelo Padrão (Pendente) */
-        }
-        .card.ok::before { background-color: #22c55e; /* Verde OK */ }
-
-        .card-header { margin-bottom: 8px; }
-        
-        .user-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: white;
-            margin: 0;
-            line-height: 1.3;
-        }
-        .user-email {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin: 4px 0 12px 0;
-            word-break: break-all;
-        }
-
-        .tags-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #334155;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
+        .card { background: #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .card::before { content: ''; position: absolute; left: 0; top: 16px; bottom: 16px; width: 4px; border-radius: 0 4px 4px 0; background-color: #fbbf24; }
+        .card.ok::before { background-color: #22c55e; }
+        .user-name { font-size: 1.1rem; font-weight: 700; color: white; margin: 0; line-height: 1.3; }
+        .user-email { font-size: 0.85rem; color: #94a3b8; margin: 4px 0 12px 0; word-break: break-all; }
+        .tags-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #334155; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-role { background: #334155; color: #cbd5e1; }
         .badge-status { background: #451a03; color: #fbbf24; cursor: pointer; } 
         .card.ok .badge-status { background: #052e16; color: #4ade80; } 
-
-        .btn-comprovante {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(59, 130, 246, 0.1);
-            color: #60a5fa;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            transition: background 0.2s;
-        }
-        .btn-comprovante:active { background: rgba(59, 130, 246, 0.2); }
+        .btn-comprovante { display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); color: #60a5fa; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(59, 130, 246, 0.2); transition: background 0.2s; }
 
         /* Loader CSS */
-        #loader {
-            position: fixed; inset: 0; background: rgba(15,23,42,0.8);
-            display: flex; align-items: center; justify-content: center; z-index: 999;
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #334155;
-            border-top: 5px solid #3b82f6; border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        #loader { position: fixed; inset: 0; background: rgba(15,23,42,0.8); display: none; align-items: center; justify-content: center; z-index: 99999; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #334155; border-top: 5px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>🔐 Acesso Restrito</h2>
+            <input type="password" id="input-senha" placeholder="Senha do Sistema">
+            <button id="btn-login" onclick="validarSenha()">ENTRAR</button>
+            <p id="login-erro">Senha Incorreta!</p>
+        </div>
+    </div>
+
     <div id="loader"><div class="spinner"></div></div>
 
-    <div class="header">
-        <img id="logo-img" src="" alt="Logo">
-        <h1>Painel de Liderança</h1>
-        <select id="select-evento" class="event-selector" onchange="carregarInscritosDoEvento()">
-            <option value="">Carregando eventos...</option>
-        </select>
-    </div>
-
-    <div class="stats-container">
-        <div class="stat-card">
-            <span class="stat-value text-total" id="stat-total">0</span>
-            <span class="stat-label">Total</span>
+    <div id="main-content">
+        <div class="header">
+            <img id="logo-img" src="" alt="Logo">
+            <h1>Painel de Liderança</h1>
+            <select id="select-evento" class="event-selector" onchange="carregarInscritosDoEvento()">
+                <option value="">Carregando eventos...</option>
+            </select>
         </div>
-        <div class="stat-card">
-            <span class="stat-value text-encontristas" id="stat-encontristas">0</span>
-            <span class="stat-label">Encontristas</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value text-servos" id="stat-servos">0</span>
-            <span class="stat-label">Servos</span>
-        </div>
-    </div>
 
-    <div class="filters">
-        <div class="btn-filter active" onclick="filtrar('todos', this)">Todos</div>
-        <div class="btn-filter" onclick="filtrar('Encontrista', this)">Encontristas</div>
-        <div class="btn-filter" onclick="filtrar('Servo', this)">Servos</div>
-    </div>
-
-    <div style="margin-bottom:20px;">
-        <button onclick="gerarRelatorioPDF()" 
-            style="
-                width:100%; padding:12px; background:#1e3a8a; border:1px solid #1e40af;
-                border-radius:10px; font-weight:700; color:white; font-size:0.95rem;
-                cursor:pointer; box-shadow:0 4px 10px rgba(30,58,138,0.4);
-            ">
-            📤 GERAR PDF DA LISTA
-        </button>
-    </div>
-
-    <div id="grid">
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-value text-total" id="stat-total">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value text-encontristas" id="stat-encontristas">0</span>
+                <span class="stat-label">Encontristas</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value text-servos" id="stat-servos">0</span>
+                <span class="stat-label">Servos</span>
+            </div>
         </div>
+
+        <div class="filters">
+            <div class="btn-filter active" onclick="filtrar('todos', this)">Todos</div>
+            <div class="btn-filter" onclick="filtrar('Encontrista', this)">Encontristas</div>
+            <div class="btn-filter" onclick="filtrar('Servo', this)">Servos</div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <button onclick="gerarRelatorioPDF()" 
+                style="width:100%; padding:12px; background:#1e3a8a; border:1px solid #1e40af; border-radius:10px; font-weight:700; color:white; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 10px rgba(30,58,138,0.4);">
+                📤 GERAR PDF DA LISTA
+            </button>
+        </div>
+
+        <div id="grid">
+            </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -262,17 +148,55 @@
         let eventosGlobais = [];
         let inscritosGlobais = [];
 
-        // Inicialização
-        window.onload = async () => {
-            await carregarEventos();
-        };
+        // Permite logar apertando o "Enter" no teclado
+        document.getElementById("input-senha").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                validarSenha();
+            }
+        });
 
-        async function carregarEventos() {
+        // ==========================================
+        // 1. SISTEMA DE LOGIN / VALIDAÇÃO DE SENHA
+        // ==========================================
+        async function validarSenha() {
+            const senhaDigitada = document.getElementById('input-senha').value;
+            const btn = document.getElementById('btn-login');
+            const erroMsg = document.getElementById('login-erro');
+
+            if (!senhaDigitada) return;
+
+            btn.disabled = true;
+            btn.innerText = 'VERIFICANDO...';
+            erroMsg.style.display = 'none';
+
+            // Vai no Supabase e procura se existe algum evento com essa senha
             const { data, error } = await supabaseClient
                 .from('eventos')
-                .select('*')
-                .order('id', { ascending: false });
+                .select('senha_checkin')
+                .eq('senha_checkin', senhaDigitada)
+                .limit(1);
 
+            if (data && data.length > 0) {
+                // Sucesso! Esconde a tela de login, mostra o painel e carrega os dados
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                await carregarEventos(); 
+            } else {
+                // Erro!
+                erroMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = 'ENTRAR';
+                document.getElementById('input-senha').value = ''; // Limpa o campo
+            }
+        }
+
+        // ==========================================
+        // RESTANTE DO CÓDIGO DO PAINEL ADMIN (Intacto)
+        // ==========================================
+        async function carregarEventos() {
+            document.getElementById('loader').style.display = 'flex';
+            const { data, error } = await supabaseClient.from('eventos').select('*').order('id', { ascending: false });
             const select = document.getElementById('select-evento');
             
             if (error || !data || data.length === 0) {
@@ -289,41 +213,27 @@
                 select.innerHTML += `<option value="${ev.id}">${status} ${ev.nome_evento}</option>`;
             });
 
-            // Carrega a logo e os inscritos do primeiro evento da lista
             atualizarLogo(data[0].logo_url);
             await carregarInscritosDoEvento();
         }
 
         function atualizarLogo(url) {
             const logo = document.getElementById('logo-img');
-            if(url) {
-                logo.src = url;
-                logo.style.display = 'inline-block';
-            } else {
-                logo.style.display = 'none';
-            }
+            if(url) { logo.src = url; logo.style.display = 'inline-block'; } 
+            else { logo.style.display = 'none'; }
         }
 
         async function carregarInscritosDoEvento() {
             document.getElementById('loader').style.display = 'flex';
             const eventoId = document.getElementById('select-evento').value;
             
-            // Atualiza logo ao trocar de evento
             const evento = eventosGlobais.find(e => e.id == eventoId);
             if(evento) atualizarLogo(evento.logo_url);
 
-            const { data, error } = await supabaseClient
-                .from('inscricoes')
-                .select('*')
-                .eq('evento_id', eventoId)
-                .order('created_at', { ascending: false });
-
+            const { data, error } = await supabaseClient.from('inscricoes').select('*').eq('evento_id', eventoId).order('created_at', { ascending: false });
             document.getElementById('loader').style.display = 'none';
 
-            if (error) {
-                alert("Erro ao puxar inscritos!");
-                return;
-            }
+            if (error) { alert("Erro ao puxar inscritos!"); return; }
 
             inscritosGlobais = data || [];
             atualizarEstatisticas();
@@ -331,13 +241,9 @@
         }
 
         function atualizarEstatisticas() {
-            const total = inscritosGlobais.length;
-            const encontristas = inscritosGlobais.filter(i => i.tipo_inscricao === 'Encontrista').length;
-            const servos = inscritosGlobais.filter(i => i.tipo_inscricao === 'Servo').length;
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-encontristas').innerText = encontristas;
-            document.getElementById('stat-servos').innerText = servos;
+            document.getElementById('stat-total').innerText = inscritosGlobais.length;
+            document.getElementById('stat-encontristas').innerText = inscritosGlobais.filter(i => i.tipo_inscricao === 'Encontrista').length;
+            document.getElementById('stat-servos').innerText = inscritosGlobais.filter(i => i.tipo_inscricao === 'Servo').length;
         }
 
         function renderizarCards(filtro = 'todos') {
@@ -350,7 +256,6 @@
             }
 
             inscritosGlobais.forEach(inscrito => {
-                // Aplica o filtro
                 if (filtro !== 'todos' && inscrito.tipo_inscricao !== filtro) return;
 
                 const isOk = inscrito.status_pagamento === 'Aprovado';
@@ -364,15 +269,11 @@
 
                         <div class="tags-row">
                             <span class="badge badge-role">${inscrito.tipo_inscricao}</span>
-                            <span class="badge badge-status" onclick="alternarStatus('${inscrito.id}', '${inscrito.status_pagamento}')">
-                                ${textoStatus}
-                            </span>
+                            <span class="badge badge-status" onclick="alternarStatus('${inscrito.id}', '${inscrito.status_pagamento}')">${textoStatus}</span>
                         </div>
 
                         ${inscrito.comprovante_url ? `
-                            <a href="${inscrito.comprovante_url}" target="_blank" class="btn-comprovante">
-                                📎 Ver Comprovante
-                            </a>
+                            <a href="${inscrito.comprovante_url}" target="_blank" class="btn-comprovante">📎 Ver Comprovante</a>
                         ` : ''}
                     </div>
                 `;
@@ -386,37 +287,23 @@
             renderizarCards(tipo);
         }
 
-        // Função para você aprovar o pagamento direto clicando na tag
         async function alternarStatus(id, statusAtual) {
             const novoStatus = statusAtual === 'Aprovado' ? 'Pendente' : 'Aprovado';
-            const confirmacao = confirm(`Deseja mudar o status para ${novoStatus}?`);
-            
-            if(!confirmacao) return;
+            if(!confirm(`Deseja mudar o status para ${novoStatus}?`)) return;
 
             document.getElementById('loader').style.display = 'flex';
-            
-            const { error } = await supabaseClient
-                .from('inscricoes')
-                .update({ status_pagamento: novoStatus })
-                .eq('id', id);
+            const { error } = await supabaseClient.from('inscricoes').update({ status_pagamento: novoStatus }).eq('id', id);
 
-            if(!error) {
-                await carregarInscritosDoEvento(); // Recarrega a tela
-            } else {
-                alert("Erro ao atualizar status");
-                document.getElementById('loader').style.display = 'none';
-            }
+            if(!error) await carregarInscritosDoEvento(); 
+            else { alert("Erro ao atualizar status"); document.getElementById('loader').style.display = 'none'; }
         }
 
-        // --- GERAÇÃO DE PDF CLIENT-SIDE ---
         function gerarRelatorioPDF() {
             document.getElementById('loader').style.display = 'flex';
-            
             setTimeout(() => {
                 try {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
-                    
                     const eventoId = document.getElementById('select-evento').value;
                     const evento = eventosGlobais.find(e => e.id == eventoId);
                     const nomeEvento = evento ? evento.nome_evento : 'Evento';
@@ -428,52 +315,31 @@
                         if (botaoAtivo.innerText.trim() === 'Servos') tipoSelecionado = 'Servo';
                     }
 
-                    // Prepara os dados da tabela
                     const dadosTabela = [];
                     inscritosGlobais.forEach(i => {
                         if (tipoSelecionado === 'todos' || i.tipo_inscricao === tipoSelecionado) {
-                            dadosTabela.push([
-                                i.nome_completo, 
-                                i.telefone, 
-                                i.tipo_inscricao, 
-                                i.status_pagamento
-                            ]);
+                            dadosTabela.push([i.nome_completo, i.telefone, i.tipo_inscricao, i.status_pagamento]);
                         }
                     });
 
-                    // Título do PDF
                     doc.setFontSize(16);
                     doc.text(`Relatorio de Inscritos - ${nomeEvento}`, 14, 15);
                     doc.setFontSize(10);
                     doc.text(`Filtro: ${tipoSelecionado.toUpperCase()} | Total: ${dadosTabela.length}`, 14, 22);
 
-                    // Gerar Tabela
-                    doc.autoTable({
-                        startY: 28,
-                        head: [['Nome', 'Telefone', 'Tipo', 'Status']],
-                        body: dadosTabela,
-                        theme: 'striped',
-                        headStyles: { fillColor: [30, 58, 138] }
-                    });
+                    doc.autoTable({ startY: 28, head: [['Nome', 'Telefone', 'Tipo', 'Status']], body: dadosTabela, theme: 'striped', headStyles: { fillColor: [30, 58, 138] } });
 
-                    // Baixar ou compartilhar
                     const pdfBlob = doc.output('blob');
                     const file = new File([pdfBlob], `Relatorio_${nomeEvento}.pdf`, { type: "application/pdf" });
 
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        navigator.share({
-                            title: "Relatório de Inscritos",
-                            files: [file]
-                        }).catch(e => console.log("Compartilhamento cancelado"));
+                        navigator.share({ title: "Relatório de Inscritos", files: [file] }).catch(e => console.log("Compartilhamento cancelado"));
                     } else {
                         doc.save(`Relatorio_${nomeEvento}.pdf`);
                     }
-                } catch (err) {
-                    alert("Erro ao gerar PDF: " + err.message);
-                } finally {
-                    document.getElementById('loader').style.display = 'none';
-                }
-            }, 500); // Pequeno atraso para a tela de loading aparecer
+                } catch (err) { alert("Erro ao gerar PDF: " + err.message); } 
+                finally { document.getElementById('loader').style.display = 'none'; }
+            }, 500);
         }
     </script>
 </body>
