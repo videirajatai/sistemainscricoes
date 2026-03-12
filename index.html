@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando Evento...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            /* As cores serão injetadas via JavaScript a partir do Supabase */
+            --primary: #5d10c1; 
+            --bg-color: #f4f4f4;
+            --text-dark: #2c3e50;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-dark); transition: background-color 0.3s ease; }
+        
+        /* HERO SECTION */
+        .hero {
+            min-height: 85vh;
+            background: linear-gradient(135deg, #1A053C, var(--primary));
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; color: white; padding: 40px 20px;
+        }
+        .hero img { max-width: 280px; margin-bottom: 30px; display: none; } /* Oculto até carregar */
+        .hero h1 { font-size: 3.5em; font-weight: 700; margin-bottom: 20px; line-height: 1.1; }
+        .hero-details p { font-size: 1.2em; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        /* FORM CARD */
+        .content {
+            background: white; width: 94%; max-width: 600px; margin: -50px auto 50px;
+            padding: 40px 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-dark); }
+        input, select {
+            width: 100%; padding: 18px; border: 2px solid #e0e0e0; border-radius: 12px;
+            font-size: 16px; font-family: inherit; background: #fcfcfc;
+        }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+        
+        /* FILE UPLOAD */
+        .file-wrapper {
+            border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 12px; cursor: pointer;
+        }
+        .file-wrapper:hover { border-color: var(--primary); background: #f9f0ff; }
+        
+        /* BUTTON STYLE */
+        .btn-submit {
+            background: var(--primary); color: white; border: none; padding: 20px; width: 100%;
+            font-size: 1.2em; font-weight: 700; border-radius: 12px; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(93, 16, 193, 0.3); }
+        .btn-submit:disabled { background: #7f8c8d; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* MESSAGES */
+        .msg { margin-top: 20px; padding: 20px; border-radius: 12px; text-align: center; display: none; font-size: 1.1em; }
+        .msg.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .msg.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        @media (max-width: 600px) { .hero h1 { font-size: 2.5em; } }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <img id="cfg-logo" src="" alt="Logo">
+        <h1 id="cfg-nome-evento">Carregando...</h1>
+        <div class="hero-details">
+            <p id="cfg-local"><i class="fas fa-map-marker-alt"></i> ...</p>
+            <p id="cfg-data"><i class="fas fa-calendar-alt"></i> ...</p>
+            <p id="cfg-horario"><i class="far fa-clock"></i> ...</p>
+        </div>
+    </section>
+
+    <div class="content">
+        <h2 style="text-align: center; margin-bottom: 30px;">Ficha de Inscrição</h2>
+        
+        <form id="form">
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" name="nomeCompleto" required placeholder="Digite seu nome">
+            </div>
+            
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="tel" name="telefone" required placeholder="(XX) XXXXX-XXXX">
+            </div>
+            
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="email" name="email" required placeholder="seu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label>Tipo de Inscrição</label>
+                <select name="tipoInscricao" required>
+                    <option value="">Selecione...</option>
+                    <option value="Encontrista">Encontrista</option>
+                    <option value="Servo">Servo</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="text-align: center; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px dashed var(--primary); margin-bottom: 25px;">
+                <label style="margin-bottom: 8px; color: #fff; font-size: 0.85em;">PAGAMENTO VIA PIX</label>                
+                <label id="cfg-valor">R$ 0,00</label>
+
+                <div onclick="copiarPix()" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s;" onmouseover="this.style.borderColor='var(--secondary)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                    <span id="textoPix" style="font-family: 'Unbounded'; font-size: 1.0em; color: var(--secondary); letter-spacing: 1px; user-select: all;">...</span>
+                    <i class="fas fa-copy" style="color: #fff;"></i>
+                </div>
+                
+                <p id="msg-pix" style="font-size: 0.75em; margin-top: 8px; color: #aaa; font-weight: 300;">
+                    <i class="fas fa-mouse-pointer"></i> Clique na chave acima para copiar
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Comprovante de Pagamento</label>
+                <label class="file-wrapper">
+                    <span id="file-text"><i class="fas fa-cloud-upload-alt"></i> Clique para anexar</span>
+                    <input type="file" id="comprovante" name="comprovante" accept="image/*,.pdf" required style="display: none;">
+                </label>
+            </div>
+
+            <button type="submit" id="btn" class="btn-submit">
+                Finalizar Inscrição
+            </button>
+        </form>
+
+        <div id="msg" class="msg"></div>
+        
+        <div id="new-btn" style="text-align:center; display:none; margin-top:20px;">
+            <button onclick="window.location.reload()" class="btn-submit" style="background: #27ae60;">
+                <i class="fas fa-plus-circle"></i> Fazer Nova Inscrição
+            </button>
+        </div>
+    </div>
+
+    <footer style="text-align: center; padding: 20px; color: #888;">
+        <a id="cfg-insta-link" href="#" style="text-decoration:none; color:inherit;" target="_blank">
+            <i class="fab fa-instagram"></i> <span id="cfg-insta-user">@instagram</span>
+        </a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // === CONFIGURAÇÃO DO SUPABASE ===
+        const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
+        const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let chavePixGlobal = ""; // Guarda a chave pix vinda do banco
+
+        // === CARREGAR CONFIGURAÇÕES DO EVENTO AO ABRIR A PÁGINA ===
+        async function carregarConfiguracoes() {
+            // Puxa a primeira linha da tabela 'config'
+            const { data, error } = await supabase.from('config').select('*').limit(1).single();
+            
+            if (data) {
+                // Atualiza Variáveis CSS (Cores)
+                document.documentElement.style.setProperty('--primary', data.cor_primaria);
+                document.documentElement.style.setProperty('--bg-color', data.cor_fundo_site);
+                
+                // Atualiza Textos
+                document.title = data.nome_evento;
+                document.getElementById('cfg-nome-evento').innerText = data.nome_evento;
+                document.getElementById('cfg-local').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.local_nome}`;
+                document.getElementById('cfg-data').innerHTML = `<i class="fas fa-calendar-alt"></i> ${data.data_texto}`;
+                document.getElementById('cfg-horario').innerHTML = `<i class="far fa-clock"></i> ${data.horario_abertura}`;
+                document.getElementById('cfg-valor').innerText = data.valor_in;
+                
+                // Atualiza Imagem
+                const logo = document.getElementById('cfg-logo');
+                logo.src = data.logo_url;
+                logo.style.display = 'inline-block';
+
+                // PIX
+                chavePixGlobal = data.pix_key;
+                document.getElementById('textoPix').innerText = data.pix_key;
+
+                // Instagram
+                document.getElementById('cfg-insta-link').href = data.instagram_link;
+                document.getElementById('cfg-insta-user').innerText = data.instagram_user;
+            } else {
+                console.error("Erro ao carregar configurações ou tabela vazia", error);
+            }
+        }
+
+        // Chama a função assim que a tela abre
+        carregarConfiguracoes();
+
+        // === COMPORTAMENTO DO ARQUIVO ===
+        const fileInput = document.getElementById('comprovante');
+        const fileText = document.getElementById('file-text');
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                fileText.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60"></i> <b>' + fileInput.files[0].name + '</b>';
+                fileText.parentElement.style.borderColor = "#27ae60";
+                fileText.parentElement.style.background = "#eafaf1";
+            }
+        });
+
+        // === FUNÇÃO PARA COPIAR O PIX ===
+        function copiarPix() {
+            if(!chavePixGlobal) return;
+            const msg = document.getElementById('msg-pix');
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(chavePixGlobal).then(() => {
+                    feedbackSucesso();
+                }).catch(err => {
+                    copiarManual(chavePixGlobal);
+                });
+            } else {
+                copiarManual(chavePixGlobal);
+            }
+
+            function feedbackSucesso() {
+                msg.innerHTML = '<span style="color: #00ff64; font-weight:bold;"><i class="fas fa-check"></i> COPIADO COM SUCESSO!</span>';
+                setTimeout(() => {
+                    msg.innerHTML = '<i class="fas fa-mouse-pointer"></i> Clique na chave acima para copiar';
+                }, 3000);
+            }
+
+            function copiarManual(texto) {
+                const tempInput = document.createElement("textarea");
+                tempInput.value = texto;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                feedbackSucesso();
+            }
+        }
+
+        // === ENVIO DO FORMULÁRIO PARA O SUPABASE ===
+        document.getElementById('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn');
+            const msg = document.getElementById('msg');
+            const email = document.getElementById('email').value;
+
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                alert("Por favor, insira um e-mail válido.");
+                return;
+            }
+
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            msg.style.display = 'none';
+
+            try {
+                const formData = new FormData(this);
+                const file = fileInput.files[0];
+
+                // 1. Upload do Arquivo para o Storage do Supabase
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('comprovantes')
+                    .upload(fileName, file);
+
+                if (uploadError) throw new Error("Erro ao fazer upload do comprovante.");
+
+                // 2. Pegar a URL pública da imagem
+                const { data: publicUrlData } = supabase.storage
+                    .from('comprovantes')
+                    .getPublicUrl(fileName);
+
+                // 3. Salvar os dados na tabela 'inscricoes'
+                const { error: insertError } = await supabase
+                    .from('inscricoes')
+                    .insert([
+                        {
+                            nome_completo: formData.get('nomeCompleto'),
+                            telefone: formData.get('telefone'),
+                            email: email,
+                            tipo_inscricao: formData.get('tipoInscricao'),
+                            comprovante_url: publicUrlData.publicUrl
+                        }
+                    ]);
+
+                if (insertError) throw new Error("Erro ao salvar dados da inscrição.");
+
+                // Sucesso
+                msg.className = 'msg success';
+                msg.innerHTML = '✅ <b>Sucesso!</b><br>Sua inscrição foi recebida com sucesso.';
+                msg.style.display = 'block';
+                
+                document.getElementById('form').style.display = 'none';
+                document.getElementById('new-btn').style.display = 'block';
+                msg.scrollIntoView({behavior: "smooth"});
+
+            } catch (erro) {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+                msg.className = 'msg error';
+                msg.innerHTML = `❌ <b>Erro:</b> ${erro.message}`;
+                msg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
