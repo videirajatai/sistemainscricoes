@@ -4,85 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações - Eventos</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #27ae60;
-            --bg: #f4f6f8;
-            --card-bg: #ffffff;
-            --text: #333333;
+            --bg-body: #0f172a;        /* Slate 900 */
+            --bg-card: #1e293b;        /* Slate 800 */
+            --bg-input: #0f172a;
+            --border: #334155;         /* Slate 700 */
+            --text-main: #f8fafc;      /* Slate 50 */
+            --text-muted: #94a3b8;     /* Slate 400 */
+            --primary: #3b82f6;        /* Blue 500 */
+            --primary-hover: #2563eb;  /* Blue 600 */
+            --success: #10b981;        /* Emerald 500 */
+            --success-hover: #059669;  /* Emerald 600 */
+            --danger: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+        
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            padding-bottom: 60px; 
+            -webkit-font-smoothing: antialiased;
+        }
 
-        /* --- TELA DE LOGIN --- */
+        /* --- TELA DE LOGIN (Efeito Vidro) --- */
         #login-screen {
-            position: fixed; inset: 0; background-color: #0f172a; z-index: 9999;
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; text-align: center;
         }
         .login-box {
-            background: #1e293b; padding: 40px 30px; border-radius: 16px; border: 1px solid #334155;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 350px;
+            background: rgba(30, 41, 59, 0.7); padding: 40px 30px; border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
+            width: 100%; max-width: 380px; backdrop-filter: blur(10px);
         }
-        .login-box h2 { margin: 0 0 20px 0; color: #f8fafc; font-size: 1.5rem; }
+        .login-box h2 { margin: 0 0 25px 0; font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px; }
         .login-box input {
-            width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155;
-            background: #0f172a; color: white; font-size: 1.2rem; text-align: center; margin-bottom: 20px; outline: none;
+            width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8); color: white; font-size: 1.2rem; text-align: center; 
+            margin-bottom: 20px; outline: none; transition: 0.3s;
         }
-        .login-box input:focus { border-color: #3b82f6; }
+        .login-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
         .login-box button {
-            width: 100%; padding: 15px; border-radius: 8px; border: none; background: #3b82f6;
-            color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+            width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary);
+            color: white; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s;
         }
-        .login-box button:active { transform: scale(0.98); background: #2563eb; }
-        #login-erro { color: #ef4444; font-size: 0.9rem; margin-top: 15px; display: none; font-weight: bold; }
+        .login-box button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+        .login-box button:active { transform: translateY(0); }
+        #login-erro { color: var(--danger); font-size: 0.95rem; margin-top: 15px; display: none; font-weight: 500; }
 
-        /* --- CONTEUDO PRINCIPAL (Escondido inicialmente) --- */
+        /* --- CONTEUDO PRINCIPAL --- */
         #main-content { display: none; }
 
+        /* HEADER MODERNIZADO */
         .header {
-            background-color: var(--primary); color: white; padding: 20px; text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+            background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 20px; text-align: center;
+            position: sticky; top: 0; z-index: 100;
         }
-        .header h1 { font-size: 1.5em; font-weight: 600; }
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .header h1 { font-size: 1.4em; font-weight: 600; letter-spacing: 0.5px; color: #fff; }
+        .header h1 i { color: var(--primary); margin-right: 8px; }
 
-        .selector-group, .form-card {
-            background: var(--card-bg); padding: 20px; border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+        .container { padding: 30px 20px; max-width: 700px; margin: 0 auto; }
+
+        /* CARDS */
+        .card {
+            background: var(--bg-card); padding: 30px; border-radius: 20px;
+            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 25px; transition: 0.3s;
         }
         .form-card { display: none; }
 
-        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--secondary); }
-        input[type="text"], input[type="password"], select, input[type="color"] {
-            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd;
-            border-radius: 8px; font-size: 1em; background-color: #f9f9f9;
+        /* TYPOGRAPHY & FORMS */
+        h2.card-title {
+            margin: 0 0 25px 0; font-size: 1.3em; font-weight: 600; 
+            border-bottom: 1px solid var(--border); padding-bottom: 15px; color: #fff;
+            display: flex; align-items: center; gap: 10px;
         }
-        input[type="color"] { padding: 5px; height: 45px; cursor: pointer; }
-        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        h2.card-title i { color: var(--primary); }
 
-        .row { display: flex; gap: 10px; }
-        .col { flex: 1; }
+        label { 
+            display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85em; 
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        
+        input[type="text"], input[type="password"], select {
+            width: 100%; padding: 14px 16px; margin-bottom: 20px; border: 1px solid var(--border);
+            border-radius: 12px; font-size: 1em; background-color: var(--bg-input); color: #fff;
+            transition: all 0.2s ease; outline: none;
+        }
+        input:focus, select:focus { 
+            border-color: var(--primary); 
+            background: #152033;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); 
+        }
 
+        /* GRID PARA CAMPOS LADO A LADO */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 500px) { .grid-2 { grid-template-columns: 1fr; gap: 0; } }
+
+        /* CORES */
+        input[type="color"] {
+            -webkit-appearance: none; border: none; width: 100%; height: 50px;
+            border-radius: 12px; cursor: pointer; padding: 0; margin-bottom: 20px;
+            background: transparent;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 12px; }
+
+        /* BOTOES */
         .btn {
-            width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1.1em;
-            font-weight: 600; cursor: pointer; transition: 0.2s; display: flex;
-            align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1.1em;
+            font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex;
+            align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.5px;
         }
-        .btn-primary { background-color: var(--accent); color: white; margin-top: 10px; }
-        .btn-primary:hover { background-color: #219a52; }
-        .btn-new { background-color: var(--primary); color: white; margin-top: 10px; }
+        .btn-new { background-color: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .btn-new:hover { background-color: rgba(59, 130, 246, 0.2); }
+        
+        .btn-save { background-color: var(--success); color: white; margin-top: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-save:hover { background-color: var(--success-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+        .btn-save:disabled { background: #475569; cursor: not-allowed; transform: none; box-shadow: none; }
 
+        /* TOAST MENSAGEM */
         #toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #333; color: white; padding: 12px 24px; border-radius: 30px;
-            font-size: 0.9em; display: none; z-index: 1000; text-align: center; white-space: nowrap;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--success); color: white; padding: 14px 28px; border-radius: 50px;
+            font-size: 1em; font-weight: 500; display: none; z-index: 1000; text-align: center; 
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); white-space: nowrap;
         }
     </style>
 </head>
@@ -90,94 +143,109 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <h2>⚙️ Configurações</h2>
-            <input type="password" id="input-senha" placeholder="Senha do Sistema">
-            <button id="btn-login" onclick="validarSenha()">ENTRAR</button>
+            <h2>⚙️ Central de Eventos</h2>
+            <input type="password" id="input-senha" placeholder="Senha Mestra">
+            <button id="btn-login" onclick="validarSenha()">ACESSAR</button>
             <p id="login-erro">Senha Incorreta!</p>
         </div>
     </div>
 
     <div id="main-content">
         <div class="header">
-            <h1><i class="fas fa-sliders-h"></i> Painel de Eventos</h1>
+            <h1><i class="fas fa-satellite-dish"></i> Centro de Comando</h1>
         </div>
 
         <div class="container">
-            <div class="selector-group">
+            <div class="card">
                 <label>Selecione um Evento</label>
                 <select id="select-evento" onchange="selecionarEvento()">
                     <option value="">Carregando eventos...</option>
                 </select>
                 <button class="btn btn-new" onclick="prepararNovoEvento()">
-                    <i class="fas fa-plus"></i> Criar Novo Evento
+                    <i class="fas fa-plus-circle"></i> Criar Novo Evento
                 </button>
             </div>
 
-            <div class="form-card" id="form-card">
-                <h2 id="form-title" style="margin-bottom: 15px; font-size: 1.2em; border-bottom: 1px solid #eee; padding-bottom: 10px;">Editar Evento</h2>
+            <div class="card form-card" id="form-card">
+                <h2 class="card-title" id="form-title"><i class="fas fa-pen-square"></i> Editar Evento</h2>
                 
                 <input type="hidden" id="evento-id">
 
                 <label>Nome do Evento</label>
                 <input type="text" id="nome_evento" placeholder="Ex: HolyFest 2026">
 
-                <label>Status das Inscrições</label>
-                <select id="status">
-                    <option value="Aberto">🟢 Aberto (Recebendo Inscrições)</option>
-                    <option value="Encerrado">🔴 Encerrado</option>
-                </select>
+                <div class="grid-2">
+                    <div>
+                        <label>Status das Inscrições</label>
+                        <select id="status">
+                            <option value="Aberto">🟢 Aberto (Recebendo)</option>
+                            <option value="Encerrado">🔴 Fechado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Senha do Evento</label>
+                        <input type="text" id="senha_checkin" placeholder="Ex: 1234">
+                    </div>
+                </div>
 
-                <label>Senha do Evento <small>(Usada no Admin, Crachás e Check-in)</small></label>
-                <input type="text" id="senha_checkin" placeholder="Ex: 1234">
-
-                <label>URL da Logo da Igreja/Evento</label>
-                <input type="text" id="logo_url" placeholder="https://link-da-imagem.com/logo.png">
+                <label>URL da Logo (Link da Imagem)</label>
+                <input type="text" id="logo_url" placeholder="https://link.com/logo.png">
 
                 <label>Nome e Endereço do Local</label>
-                <input type="text" id="local_nome" placeholder="Ex: Igreja Videira - Rua X...">
+                <input type="text" id="local_nome" placeholder="Ex: Videira Jataí - Rua X...">
 
-                <div class="row">
-                    <div class="col">
-                        <label>Data (Texto)</label>
+                <div class="grid-2">
+                    <div>
+                        <label>Data</label>
                         <input type="text" id="data_texto" placeholder="Ex: 17 de Fev">
                     </div>
-                    <div class="col">
+                    <div>
                         <label>Horário</label>
                         <input type="text" id="horario_abertura" placeholder="Ex: 19:30">
                     </div>
                 </div>
 
-                <label>Valor da Inscrição (Texto)</label>
-                <input type="text" id="valor_in" placeholder="Ex: R$ 50,00">
+                <div class="grid-2">
+                    <div>
+                        <label>Valor da Inscrição</label>
+                        <input type="text" id="valor_in" placeholder="Ex: R$ 50,00">
+                    </div>
+                    <div>
+                        <label>Chave PIX (Para Copiar)</label>
+                        <input type="text" id="pix_key" placeholder="CNPJ, Email ou Celular">
+                    </div>
+                </div>
 
-                <label>Chave PIX (Para Copiar)</label>
-                <input type="text" id="pix_key" placeholder="CNPJ, Email ou Celular">
-
-                <div class="row">
-                    <div class="col">
-                        <label>Cor Primária</label>
+                <div class="grid-2">
+                    <div>
+                        <label>Cor Primária do Site</label>
                         <input type="color" id="cor_primaria">
                     </div>
-                    <div class="col">
-                        <label>Cor do Fundo</label>
+                    <div>
+                        <label>Cor do Fundo do Site</label>
                         <input type="color" id="cor_fundo_site">
                     </div>
                 </div>
 
-                <label>Link do Instagram</label>
-                <input type="text" id="instagram_link" placeholder="https://instagram.com/seu.user">
+                <div class="grid-2">
+                    <div>
+                        <label>Link do Instagram</label>
+                        <input type="text" id="instagram_link" placeholder="https://instagram.com/user">
+                    </div>
+                    <div>
+                        <label>Usuário (@)</label>
+                        <input type="text" id="instagram_user" placeholder="Ex: @videirajatai">
+                    </div>
+                </div>
 
-                <label>Usuário do Instagram</label>
-                <input type="text" id="instagram_user" placeholder="Ex: @videirajatai">
-
-                <button class="btn btn-primary" id="btn-salvar" onclick="salvarEvento()">
-                    <i class="fas fa-save"></i> Salvar Evento
+                <button class="btn btn-save" id="btn-salvar" onclick="salvarEvento()">
+                    <i class="fas fa-check-circle"></i> Salvar Evento
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="toast"><i class="fas fa-check-circle"></i> Salvo com sucesso!</div>
+    <div id="toast"><i class="fas fa-check"></i> Evento salvo com sucesso!</div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -189,15 +257,10 @@
         let eventosLista = [];
 
         document.getElementById("input-senha").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                validarSenha();
-            }
+            if (event.key === "Enter") { event.preventDefault(); validarSenha(); }
         });
 
-        // ==========================================
-        // 1. SISTEMA DE LOGIN / VALIDAÇÃO DE SENHA
-        // ==========================================
+        // 1. SISTEMA DE LOGIN
         async function validarSenha() {
             const senhaDigitada = document.getElementById('input-senha').value;
             const btn = document.getElementById('btn-login');
@@ -206,27 +269,22 @@
             if (!senhaDigitada) return;
 
             btn.disabled = true;
-            btn.innerText = 'VERIFICANDO...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             erroMsg.style.display = 'none';
 
-            // Senhas de emergência caso o banco de dados esteja vazio
             if (senhaDigitada === 'admin' || senhaDigitada === '1234') {
-                liberarAcesso();
-                return;
+                liberarAcesso(); return;
             }
 
             const { data, error } = await supabaseClient
-                .from('eventos')
-                .select('senha_checkin')
-                .eq('senha_checkin', senhaDigitada)
-                .limit(1);
+                .from('eventos').select('senha_checkin').eq('senha_checkin', senhaDigitada).limit(1);
 
             if (data && data.length > 0) {
                 liberarAcesso();
             } else {
                 erroMsg.style.display = 'block';
                 btn.disabled = false;
-                btn.innerText = 'ENTRAR';
+                btn.innerText = 'ACESSAR';
                 document.getElementById('input-senha').value = ''; 
             }
         }
@@ -237,19 +295,14 @@
             await carregarEventos();
         }
 
-        // ==========================================
-        // LÓGICA DO CONFIG (Formulário)
-        // ==========================================
+        // 2. LÓGICA DO CONFIG
         async function carregarEventos() {
             const select = document.getElementById('select-evento');
             select.innerHTML = '<option value="">Carregando...</option>';
 
             const { data, error } = await supabaseClient.from('eventos').select('*').order('id', { ascending: false }); 
 
-            if (error) {
-                alert("Erro ao carregar eventos.");
-                return;
-            }
+            if (error) { alert("Erro ao carregar eventos."); return; }
 
             eventosLista = data;
             
@@ -269,15 +322,13 @@
             const idSelecionado = select.value;
 
             if (!idSelecionado) {
-                document.getElementById('form-card').style.display = 'none';
-                return;
+                document.getElementById('form-card').style.display = 'none'; return;
             }
 
             const evento = eventosLista.find(ev => ev.id == idSelecionado);
-            
             if (evento) {
                 preencherFormulario(evento);
-                document.getElementById('form-title').innerText = "Editar Evento: " + evento.nome_evento;
+                document.getElementById('form-title').innerHTML = "<i class='fas fa-pen-square'></i> Editar Evento";
                 document.getElementById('form-card').style.display = 'block';
             }
         }
@@ -288,7 +339,7 @@
             const camposVazios = {
                 id: "", nome_evento: "", status: "Aberto", senha_checkin: "1234", logo_url: "", local_nome: "",
                 data_texto: "", horario_abertura: "", valor_in: "", pix_key: "",
-                cor_primaria: "#5d10c1", cor_fundo_site: "#f4f4f4",
+                cor_primaria: "#3b82f6", cor_fundo_site: "#f4f4f4",
                 instagram_link: "", instagram_user: ""
             };
             
@@ -302,7 +353,7 @@
             document.getElementById('evento-id').value = dados.id;
             document.getElementById('nome_evento').value = dados.nome_evento;
             document.getElementById('status').value = dados.status;
-            document.getElementById('senha_checkin').value = dados.senha_checkin || "1234"; // Preenche a senha
+            document.getElementById('senha_checkin').value = dados.senha_checkin || "1234";
             document.getElementById('logo_url').value = dados.logo_url;
             document.getElementById('local_nome').value = dados.local_nome;
             document.getElementById('data_texto').value = dados.data_texto;
@@ -320,28 +371,19 @@
             const id = document.getElementById('evento-id').value;
             const nome = document.getElementById('nome_evento').value;
 
-            if (!nome) {
-                alert("O nome do evento é obrigatório!");
-                return;
-            }
+            if (!nome) { alert("O nome do evento é obrigatório!"); return; }
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
             const payload = {
-                nome_evento: nome,
-                status: document.getElementById('status').value,
-                senha_checkin: document.getElementById('senha_checkin').value || '1234', // Salva a senha
-                logo_url: document.getElementById('logo_url').value,
-                local_nome: document.getElementById('local_nome').value,
-                data_texto: document.getElementById('data_texto').value,
-                horario_abertura: document.getElementById('horario_abertura').value,
-                valor_in: document.getElementById('valor_in').value,
-                pix_key: document.getElementById('pix_key').value,
-                cor_primaria: document.getElementById('cor_primaria').value,
-                cor_fundo_site: document.getElementById('cor_fundo_site').value,
-                instagram_link: document.getElementById('instagram_link').value,
-                instagram_user: document.getElementById('instagram_user').value
+                nome_evento: nome, status: document.getElementById('status').value,
+                senha_checkin: document.getElementById('senha_checkin').value || '1234',
+                logo_url: document.getElementById('logo_url').value, local_nome: document.getElementById('local_nome').value,
+                data_texto: document.getElementById('data_texto').value, horario_abertura: document.getElementById('horario_abertura').value,
+                valor_in: document.getElementById('valor_in').value, pix_key: document.getElementById('pix_key').value,
+                cor_primaria: document.getElementById('cor_primaria').value, cor_fundo_site: document.getElementById('cor_fundo_site').value,
+                instagram_link: document.getElementById('instagram_link').value, instagram_user: document.getElementById('instagram_user').value
             };
 
             let erroAoSalvar = null;
@@ -355,19 +397,14 @@
             }
 
             if (erroAoSalvar) {
-                alert("Erro ao salvar: " + erroAoSalvar.message);
-                console.error(erroAoSalvar);
+                alert("Erro ao salvar: " + erroAoSalvar.message); console.error(erroAoSalvar);
             } else {
-                mostrarToast();
-                await carregarEventos(); 
-                
-                if (!id) {
-                    document.getElementById('form-card').style.display = 'none';
-                }
+                mostrarToast(); await carregarEventos(); 
+                if (!id) document.getElementById('form-card').style.display = 'none';
             }
 
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Salvar Evento';
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Salvar Evento';
         }
 
         function mostrarToast() {
