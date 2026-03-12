@@ -49,7 +49,7 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: none; /* Escondido até selecionar um evento */
+            display: none; /* Fica escondido até você clicar em algo */
         }
 
         label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--secondary); }
@@ -102,7 +102,7 @@
         .status-aberto { background-color: #d4edda; color: #155724; }
         .status-encerrado { background-color: #f8d7da; color: #721c24; }
 
-        /* Toast Message */
+        /* Mensagem de sucesso flutuante */
         #toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: #333; color: white; padding: 12px 24px; border-radius: 30px;
@@ -192,28 +192,25 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-// === CONFIGURAÇÃO DO SUPABASE ===
+        // === CONFIGURAÇÃO DO SUPABASE ===
         const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
         const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
-        
-        // MUDANÇA AQUI: Trocamos 'supabase' por 'supabaseClient' para evitar conflito
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let eventosLista = [];
 
+        // Inicia carregando a lista
         carregarEventos();
 
         async function carregarEventos() {
             const select = document.getElementById('select-evento');
             select.innerHTML = '<option value="">Carregando...</option>';
 
-            // MUDANÇA AQUI TAMBÉM
             const { data, error } = await supabaseClient
                 .from('eventos')
                 .select('*')
-                .order('id', { ascending: false });
+                .order('id', { ascending: false }); 
 
-            // ... (o resto da função continua igualzinho)
             if (error) {
                 alert("Erro ao carregar eventos.");
                 console.error(error);
@@ -232,11 +229,60 @@
                 });
             }
         }
-        
-        // ... (as funções selecionarEvento, prepararNovoEvento e preencherFormulario continuam as mesmas) ...
+
+        function selecionarEvento() {
+            const select = document.getElementById('select-evento');
+            const idSelecionado = select.value;
+
+            if (!idSelecionado) {
+                document.getElementById('form-card').style.display = 'none';
+                return;
+            }
+
+            // Acha os dados do evento na lista carregada
+            const evento = eventosLista.find(ev => ev.id == idSelecionado);
+            
+            if (evento) {
+                preencherFormulario(evento);
+                document.getElementById('form-title').innerText = "Editar Evento: " + evento.nome_evento;
+                document.getElementById('form-card').style.display = 'block';
+            }
+        }
+
+        function prepararNovoEvento() {
+            document.getElementById('select-evento').value = ""; 
+            
+            // Limpa todos os campos para um novo cadastro
+            const camposVazios = {
+                id: "", nome_evento: "", status: "Aberto", logo_url: "", local_nome: "",
+                data_texto: "", horario_abertura: "", valor_in: "", pix_key: "",
+                cor_primaria: "#5d10c1", cor_fundo_site: "#f4f4f4",
+                instagram_link: "", instagram_user: ""
+            };
+            
+            preencherFormulario(camposVazios);
+            document.getElementById('form-title').innerHTML = "<i class='fas fa-star'></i> Criar Novo Evento";
+            document.getElementById('form-card').style.display = 'block';
+            window.scrollTo({ top: document.getElementById('form-card').offsetTop, behavior: 'smooth' });
+        }
+
+        function preencherFormulario(dados) {
+            document.getElementById('evento-id').value = dados.id;
+            document.getElementById('nome_evento').value = dados.nome_evento;
+            document.getElementById('status').value = dados.status;
+            document.getElementById('logo_url').value = dados.logo_url;
+            document.getElementById('local_nome').value = dados.local_nome;
+            document.getElementById('data_texto').value = dados.data_texto;
+            document.getElementById('horario_abertura').value = dados.horario_abertura;
+            document.getElementById('valor_in').value = dados.valor_in;
+            document.getElementById('pix_key').value = dados.pix_key;
+            document.getElementById('cor_primaria').value = dados.cor_primaria;
+            document.getElementById('cor_fundo_site').value = dados.cor_fundo_site;
+            document.getElementById('instagram_link').value = dados.instagram_link;
+            document.getElementById('instagram_user').value = dados.instagram_user;
+        }
 
         async function salvarEvento() {
-            // ... (código de validação continua igual)
             const btn = document.getElementById('btn-salvar');
             const id = document.getElementById('evento-id').value;
             const nome = document.getElementById('nome_evento').value;
@@ -267,11 +313,9 @@
             let erroAoSalvar = null;
 
             if (id) {
-                // MUDANÇA AQUI
                 const { error } = await supabaseClient.from('eventos').update(payload).eq('id', id);
                 erroAoSalvar = error;
             } else {
-                // MUDANÇA AQUI
                 const { error } = await supabaseClient.from('eventos').insert([payload]);
                 erroAoSalvar = error;
             }
@@ -282,11 +326,20 @@
             } else {
                 mostrarToast();
                 await carregarEventos(); 
-                if (!id) document.getElementById('form-card').style.display = 'none';
+                
+                if (!id) {
+                    document.getElementById('form-card').style.display = 'none';
+                }
             }
 
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-save"></i> Salvar Evento';
+        }
+
+        function mostrarToast() {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
