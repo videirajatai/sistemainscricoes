@@ -18,52 +18,52 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
         body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
 
-        .header {
-            background-color: var(--primary);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* --- TELA DE LOGIN --- */
+        #login-screen {
+            position: fixed; inset: 0; background-color: #0f172a; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
         }
+        .login-box {
+            background: #1e293b; padding: 40px 30px; border-radius: 16px; border: 1px solid #334155;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 350px;
+        }
+        .login-box h2 { margin: 0 0 20px 0; color: #f8fafc; font-size: 1.5rem; }
+        .login-box input {
+            width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155;
+            background: #0f172a; color: white; font-size: 1.2rem; text-align: center; margin-bottom: 20px; outline: none;
+        }
+        .login-box input:focus { border-color: #3b82f6; }
+        .login-box button {
+            width: 100%; padding: 15px; border-radius: 8px; border: none; background: #3b82f6;
+            color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .login-box button:active { transform: scale(0.98); background: #2563eb; }
+        #login-erro { color: #ef4444; font-size: 0.9rem; margin-top: 15px; display: none; font-weight: bold; }
 
+        /* --- CONTEUDO PRINCIPAL (Escondido inicialmente) --- */
+        #main-content { display: none; }
+
+        .header {
+            background-color: var(--primary); color: white; padding: 20px; text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+        }
         .header h1 { font-size: 1.5em; font-weight: 600; }
-
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
 
-        .selector-group {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+        .selector-group, .form-card {
+            background: var(--card-bg); padding: 20px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
-
-        .form-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: none; /* Fica escondido até você clicar em algo */
-        }
+        .form-card { display: none; }
 
         label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--secondary); }
-        
-        input[type="text"], select, input[type="color"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            background-color: #f9f9f9;
+        input[type="text"], input[type="password"], select, input[type="color"] {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 1em; background-color: #f9f9f9;
         }
-
         input[type="color"] { padding: 5px; height: 45px; cursor: pointer; }
         input:focus, select:focus { outline: none; border-color: var(--primary); }
 
@@ -71,38 +71,14 @@
         .col { flex: 1; }
 
         .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1.1em;
+            font-weight: 600; cursor: pointer; transition: 0.2s; display: flex;
+            align-items: center; justify-content: center; gap: 10px;
         }
-
         .btn-primary { background-color: var(--accent); color: white; margin-top: 10px; }
         .btn-primary:hover { background-color: #219a52; }
-        
         .btn-new { background-color: var(--primary); color: white; margin-top: 10px; }
 
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .status-aberto { background-color: #d4edda; color: #155724; }
-        .status-encerrado { background-color: #f8d7da; color: #721c24; }
-
-        /* Mensagem de sucesso flutuante */
         #toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: #333; color: white; padding: 12px 24px; border-radius: 30px;
@@ -112,78 +88,92 @@
 </head>
 <body>
 
-    <div class="header">
-        <h1><i class="fas fa-sliders-h"></i> Painel de Eventos</h1>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>⚙️ Configurações</h2>
+            <input type="password" id="input-senha" placeholder="Senha do Sistema">
+            <button id="btn-login" onclick="validarSenha()">ENTRAR</button>
+            <p id="login-erro">Senha Incorreta!</p>
+        </div>
     </div>
 
-    <div class="container">
-        <div class="selector-group">
-            <label>Selecione um Evento</label>
-            <select id="select-evento" onchange="selecionarEvento()">
-                <option value="">Carregando eventos...</option>
-            </select>
-            <button class="btn btn-new" onclick="prepararNovoEvento()">
-                <i class="fas fa-plus"></i> Criar Novo Evento
-            </button>
+    <div id="main-content">
+        <div class="header">
+            <h1><i class="fas fa-sliders-h"></i> Painel de Eventos</h1>
         </div>
 
-        <div class="form-card" id="form-card">
-            <h2 id="form-title" style="margin-bottom: 15px; font-size: 1.2em; border-bottom: 1px solid #eee; padding-bottom: 10px;">Editar Evento</h2>
-            
-            <input type="hidden" id="evento-id">
-
-            <label>Nome do Evento</label>
-            <input type="text" id="nome_evento" placeholder="Ex: HolyFest 2026">
-
-            <label>Status das Inscrições</label>
-            <select id="status">
-                <option value="Aberto">🟢 Aberto (Recebendo Inscrições)</option>
-                <option value="Encerrado">🔴 Encerrado</option>
-            </select>
-
-            <label>URL da Logo da Igreja/Evento</label>
-            <input type="text" id="logo_url" placeholder="https://link-da-imagem.com/logo.png">
-
-            <label>Nome e Endereço do Local</label>
-            <input type="text" id="local_nome" placeholder="Ex: Igreja Videira - Rua X...">
-
-            <div class="row">
-                <div class="col">
-                    <label>Data (Texto)</label>
-                    <input type="text" id="data_texto" placeholder="Ex: 17 de Fev">
-                </div>
-                <div class="col">
-                    <label>Horário</label>
-                    <input type="text" id="horario_abertura" placeholder="Ex: 19:30">
-                </div>
+        <div class="container">
+            <div class="selector-group">
+                <label>Selecione um Evento</label>
+                <select id="select-evento" onchange="selecionarEvento()">
+                    <option value="">Carregando eventos...</option>
+                </select>
+                <button class="btn btn-new" onclick="prepararNovoEvento()">
+                    <i class="fas fa-plus"></i> Criar Novo Evento
+                </button>
             </div>
 
-            <label>Valor da Inscrição (Texto)</label>
-            <input type="text" id="valor_in" placeholder="Ex: R$ 50,00">
+            <div class="form-card" id="form-card">
+                <h2 id="form-title" style="margin-bottom: 15px; font-size: 1.2em; border-bottom: 1px solid #eee; padding-bottom: 10px;">Editar Evento</h2>
+                
+                <input type="hidden" id="evento-id">
 
-            <label>Chave PIX (Para Copiar)</label>
-            <input type="text" id="pix_key" placeholder="CNPJ, Email ou Celular">
+                <label>Nome do Evento</label>
+                <input type="text" id="nome_evento" placeholder="Ex: HolyFest 2026">
 
-            <div class="row">
-                <div class="col">
-                    <label>Cor Primária</label>
-                    <input type="color" id="cor_primaria">
+                <label>Status das Inscrições</label>
+                <select id="status">
+                    <option value="Aberto">🟢 Aberto (Recebendo Inscrições)</option>
+                    <option value="Encerrado">🔴 Encerrado</option>
+                </select>
+
+                <label>Senha do Evento <small>(Usada no Admin, Crachás e Check-in)</small></label>
+                <input type="text" id="senha_checkin" placeholder="Ex: 1234">
+
+                <label>URL da Logo da Igreja/Evento</label>
+                <input type="text" id="logo_url" placeholder="https://link-da-imagem.com/logo.png">
+
+                <label>Nome e Endereço do Local</label>
+                <input type="text" id="local_nome" placeholder="Ex: Igreja Videira - Rua X...">
+
+                <div class="row">
+                    <div class="col">
+                        <label>Data (Texto)</label>
+                        <input type="text" id="data_texto" placeholder="Ex: 17 de Fev">
+                    </div>
+                    <div class="col">
+                        <label>Horário</label>
+                        <input type="text" id="horario_abertura" placeholder="Ex: 19:30">
+                    </div>
                 </div>
-                <div class="col">
-                    <label>Cor do Fundo</label>
-                    <input type="color" id="cor_fundo_site">
+
+                <label>Valor da Inscrição (Texto)</label>
+                <input type="text" id="valor_in" placeholder="Ex: R$ 50,00">
+
+                <label>Chave PIX (Para Copiar)</label>
+                <input type="text" id="pix_key" placeholder="CNPJ, Email ou Celular">
+
+                <div class="row">
+                    <div class="col">
+                        <label>Cor Primária</label>
+                        <input type="color" id="cor_primaria">
+                    </div>
+                    <div class="col">
+                        <label>Cor do Fundo</label>
+                        <input type="color" id="cor_fundo_site">
+                    </div>
                 </div>
+
+                <label>Link do Instagram</label>
+                <input type="text" id="instagram_link" placeholder="https://instagram.com/seu.user">
+
+                <label>Usuário do Instagram</label>
+                <input type="text" id="instagram_user" placeholder="Ex: @videirajatai">
+
+                <button class="btn btn-primary" id="btn-salvar" onclick="salvarEvento()">
+                    <i class="fas fa-save"></i> Salvar Evento
+                </button>
             </div>
-
-            <label>Link do Instagram</label>
-            <input type="text" id="instagram_link" placeholder="https://instagram.com/seu.user">
-
-            <label>Usuário do Instagram</label>
-            <input type="text" id="instagram_user" placeholder="Ex: @videirajatai">
-
-            <button class="btn btn-primary" id="btn-salvar" onclick="salvarEvento()">
-                <i class="fas fa-save"></i> Salvar Evento
-            </button>
         </div>
     </div>
 
@@ -192,28 +182,72 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // === CONFIGURAÇÃO DO SUPABASE ===
         const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
         const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let eventosLista = [];
 
-        // Inicia carregando a lista
-        carregarEventos();
+        document.getElementById("input-senha").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                validarSenha();
+            }
+        });
 
+        // ==========================================
+        // 1. SISTEMA DE LOGIN / VALIDAÇÃO DE SENHA
+        // ==========================================
+        async function validarSenha() {
+            const senhaDigitada = document.getElementById('input-senha').value;
+            const btn = document.getElementById('btn-login');
+            const erroMsg = document.getElementById('login-erro');
+
+            if (!senhaDigitada) return;
+
+            btn.disabled = true;
+            btn.innerText = 'VERIFICANDO...';
+            erroMsg.style.display = 'none';
+
+            // Senhas de emergência caso o banco de dados esteja vazio
+            if (senhaDigitada === 'admin' || senhaDigitada === '1234') {
+                liberarAcesso();
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('eventos')
+                .select('senha_checkin')
+                .eq('senha_checkin', senhaDigitada)
+                .limit(1);
+
+            if (data && data.length > 0) {
+                liberarAcesso();
+            } else {
+                erroMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = 'ENTRAR';
+                document.getElementById('input-senha').value = ''; 
+            }
+        }
+
+        async function liberarAcesso() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            await carregarEventos();
+        }
+
+        // ==========================================
+        // LÓGICA DO CONFIG (Formulário)
+        // ==========================================
         async function carregarEventos() {
             const select = document.getElementById('select-evento');
             select.innerHTML = '<option value="">Carregando...</option>';
 
-            const { data, error } = await supabaseClient
-                .from('eventos')
-                .select('*')
-                .order('id', { ascending: false }); 
+            const { data, error } = await supabaseClient.from('eventos').select('*').order('id', { ascending: false }); 
 
             if (error) {
                 alert("Erro ao carregar eventos.");
-                console.error(error);
                 return;
             }
 
@@ -239,7 +273,6 @@
                 return;
             }
 
-            // Acha os dados do evento na lista carregada
             const evento = eventosLista.find(ev => ev.id == idSelecionado);
             
             if (evento) {
@@ -252,9 +285,8 @@
         function prepararNovoEvento() {
             document.getElementById('select-evento').value = ""; 
             
-            // Limpa todos os campos para um novo cadastro
             const camposVazios = {
-                id: "", nome_evento: "", status: "Aberto", logo_url: "", local_nome: "",
+                id: "", nome_evento: "", status: "Aberto", senha_checkin: "1234", logo_url: "", local_nome: "",
                 data_texto: "", horario_abertura: "", valor_in: "", pix_key: "",
                 cor_primaria: "#5d10c1", cor_fundo_site: "#f4f4f4",
                 instagram_link: "", instagram_user: ""
@@ -270,6 +302,7 @@
             document.getElementById('evento-id').value = dados.id;
             document.getElementById('nome_evento').value = dados.nome_evento;
             document.getElementById('status').value = dados.status;
+            document.getElementById('senha_checkin').value = dados.senha_checkin || "1234"; // Preenche a senha
             document.getElementById('logo_url').value = dados.logo_url;
             document.getElementById('local_nome').value = dados.local_nome;
             document.getElementById('data_texto').value = dados.data_texto;
@@ -298,6 +331,7 @@
             const payload = {
                 nome_evento: nome,
                 status: document.getElementById('status').value,
+                senha_checkin: document.getElementById('senha_checkin').value || '1234', // Salva a senha
                 logo_url: document.getElementById('logo_url').value,
                 local_nome: document.getElementById('local_nome').value,
                 data_texto: document.getElementById('data_texto').value,
