@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Leitor de Check-in</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo base */
+        body { 
+            background: #0f1720; /* Fundo padrão */
+            color: white; 
+            font-family: 'Poppins', sans-serif;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 20px; 
+            border-radius: 30px; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 450px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            display: none; /* Escondido até carregar os dados */
+        }
+
+        /* Estilo específico para erro */
+        .card.error-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid #fff;
+        }
+
+        h1 { 
+            color: #f1c40f; 
+            font-size: 2.2rem; 
+            margin-bottom: 10px; 
+            text-transform: uppercase;
+        }
+
+        /* Texto do nome do participante */
+        .name { 
+            font-size: 1.8rem; 
+            font-weight: 700;
+            margin: 20px 0; 
+            line-height: 1.2;
+            color: #ffffff;
+        }
+
+        .error-msg {
+            font-size: 1.4rem;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        input { 
+            font-size: 1.5rem; 
+            padding: 15px; 
+            width: 80%; 
+            border-radius: 12px; 
+            border: 2px solid rgba(255,255,255,0.3); 
+            text-align: center; 
+            margin: 20px 0;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            outline: none;
+        }
+
+        button {
+            font-size: 1.4rem; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: none;
+            background: #27ae60; 
+            color: white; 
+            cursor: pointer; 
+            width: 90%;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #7f8c8d; cursor: not-allowed; }
+        
+        .logo-checkin {
+            max-width: 120px;
+            margin-bottom: 20px;
+        }
+
+        #loading { font-size: 1.5rem; font-weight: bold; color: #f1c40f; }
+    </style>
+</head>
+<body>
+    
+    <div id="loading">Buscando Inscrição...</div>
+
+    <div class="card error-card" id="errorCard">
+        <img id="logo-erro" src="" class="logo-checkin" style="display:none;">
+        <h1>⚠️ ATENÇÃO</h1>
+        <div class="error-msg" id="texto-erro">
+            Erro desconhecido.
+        </div>
+        <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.8;">
+            Peça ao participante para procurar a secretaria.
+        </p>
+    </div>
+
+    <div class="card" id="mainCard">
+        <img id="logo-ok" src="" class="logo-checkin" style="display:none;">
+        <h1>🎟️ Check-in</h1>
+        <p style="color: #f1c40f; margin: 0; font-weight: bold;">PARTICIPANTE:</p>
+        <p class="name" id="nome-participante">...</p>
+        <p style="color: #bbb; font-size: 0.9rem;">Código: <span id="codigo-participante">...</span></p>
+        
+        <input type="tel" id="senha" placeholder="Senha Operador" maxlength="4">
+        <button id="btn" onclick="confirmarCheckin()">CONFIRMAR ENTRADA</button>
+        <p id="msg" style="font-size: 1.2rem; margin-top: 20px; font-weight: bold;"></p>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
+        const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let senhaCorretaDoEvento = "";
+        let inscritoId = "";
+
+        // Inicialização: Ler a URL e buscar os dados
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            inscritoId = urlParams.get('id');
+
+            if (!inscritoId) {
+                mostrarErro("QR Code Inválido (Sem ID).");
+                return;
+            }
+
+            await buscarDadosDoInscrito(inscritoId);
+        };
+
+        async function buscarDadosDoInscrito(id) {
+            // 1. Busca o inscrito
+            const { data: inscrito, error: erroInscrito } = await supabaseClient
+                .from('inscricoes')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (erroInscrito || !inscrito) {
+                mostrarErro("Inscrição não encontrada no sistema.");
+                return;
+            }
+
+            // 2. Busca os dados do evento atrelado a ele (para pegar logo e senha)
+            const { data: evento } = await supabaseClient
+                .from('eventos')
+                .select('logo_url, senha_checkin')
+                .eq('id', inscrito.evento_id)
+                .single();
+
+            if (evento) {
+                senhaCorretaDoEvento = evento.senha_checkin;
+                if(evento.logo_url) {
+                    document.getElementById('logo-erro').src = evento.logo_url;
+                    document.getElementById('logo-ok').src = evento.logo_url;
+                    document.getElementById('logo-erro').style.display = 'inline-block';
+                    document.getElementById('logo-ok').style.display = 'inline-block';
+                }
+            }
+
+            // 3. Validações de Regra de Negócio
+            if (inscrito.status_pagamento !== 'Aprovado') {
+                mostrarErro("Pagamento ainda<br>está PENDENTE.");
+                return;
+            }
+
+            if (inscrito.checkin === 'Sim') {
+                mostrarErro("O Check-in já foi<br>realizado antes!");
+                return;
+            }
+
+            // Se passou em tudo, mostra a tela para digitar a senha
+            mostrarTelaConfirmacao(inscrito);
+        }
+
+        function mostrarErro(mensagem) {
+            document.body.style.background = '#c0392b'; // Fundo Vermelho
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('texto-erro').innerHTML = mensagem;
+            document.getElementById('errorCard').style.display = 'block';
+        }
+
+        function mostrarTelaConfirmacao(inscrito) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('nome-participante').innerText = inscrito.nome_completo;
+            
+            // Pega os primeiros 8 caracteres do ID para servir como "Código" visual
+            document.getElementById('codigo-participante').innerText = inscrito.id.substring(0, 8).toUpperCase();
+            
+            document.getElementById('mainCard').style.display = 'block';
+        }
+
+        async function confirmarCheckin() {
+            const senhaDigitada = document.getElementById('senha').value;
+            const msg = document.getElementById('msg');
+            const btn = document.getElementById('btn');
+
+            if (senhaDigitada !== senhaCorretaDoEvento) {
+                msg.innerText = "🚫 SENHA INCORRETA!";
+                msg.style.color = "#ff4757";
+                document.getElementById('senha').value = "";
+                return;
+            }
+
+            // Senha Correta! Atualiza no banco
+            btn.disabled = true;
+            btn.innerText = "PROCESSANDO...";
+            msg.innerText = "";
+
+            const { error } = await supabaseClient
+                .from('inscricoes')
+                .update({ checkin: 'Sim' })
+                .eq('id', inscritoId);
+
+            if (error) {
+                msg.innerText = "Erro ao salvar na base de dados!";
+                msg.style.color = "#ff4757";
+                btn.disabled = false;
+                btn.innerText = "CONFIRMAR ENTRADA";
+                return;
+            }
+
+            // Sucesso Visual
+            document.body.style.background = "#27ae60"; // Fundo verde
+            document.getElementById('mainCard').innerHTML = `
+                <img src="${document.getElementById('logo-ok').src}" class="logo-checkin">
+                <h1 style="color:white">✅ SUCESSO!</h1>
+                <p class="name">Acesso Liberado!</p>
+                <p>Bom Encontro!</p>
+            `;
+        }
+    </script>
+</body>
+</html>
