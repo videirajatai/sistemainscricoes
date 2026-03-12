@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Eventos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #27ae60;
+            --bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 { font-size: 1.5em; font-weight: 600; }
+
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+        .selector-group {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: none; /* Escondido até selecionar um evento */
+        }
+
+        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--secondary); }
+        
+        input[type="text"], select, input[type="color"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: #f9f9f9;
+        }
+
+        input[type="color"] { padding: 5px; height: 45px; cursor: pointer; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary { background-color: var(--accent); color: white; margin-top: 10px; }
+        .btn-primary:hover { background-color: #219a52; }
+        
+        .btn-new { background-color: var(--primary); color: white; margin-top: 10px; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .status-aberto { background-color: #d4edda; color: #155724; }
+        .status-encerrado { background-color: #f8d7da; color: #721c24; }
+
+        /* Toast Message */
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 24px; border-radius: 30px;
+            font-size: 0.9em; display: none; z-index: 1000; text-align: center; white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fas fa-sliders-h"></i> Painel de Eventos</h1>
+    </div>
+
+    <div class="container">
+        <div class="selector-group">
+            <label>Selecione um Evento</label>
+            <select id="select-evento" onchange="selecionarEvento()">
+                <option value="">Carregando eventos...</option>
+            </select>
+            <button class="btn btn-new" onclick="prepararNovoEvento()">
+                <i class="fas fa-plus"></i> Criar Novo Evento
+            </button>
+        </div>
+
+        <div class="form-card" id="form-card">
+            <h2 id="form-title" style="margin-bottom: 15px; font-size: 1.2em; border-bottom: 1px solid #eee; padding-bottom: 10px;">Editar Evento</h2>
+            
+            <input type="hidden" id="evento-id">
+
+            <label>Nome do Evento</label>
+            <input type="text" id="nome_evento" placeholder="Ex: HolyFest 2026">
+
+            <label>Status das Inscrições</label>
+            <select id="status">
+                <option value="Aberto">🟢 Aberto (Recebendo Inscrições)</option>
+                <option value="Encerrado">🔴 Encerrado</option>
+            </select>
+
+            <label>URL da Logo da Igreja/Evento</label>
+            <input type="text" id="logo_url" placeholder="https://link-da-imagem.com/logo.png">
+
+            <label>Nome e Endereço do Local</label>
+            <input type="text" id="local_nome" placeholder="Ex: Igreja Videira - Rua X...">
+
+            <div class="row">
+                <div class="col">
+                    <label>Data (Texto)</label>
+                    <input type="text" id="data_texto" placeholder="Ex: 17 de Fev">
+                </div>
+                <div class="col">
+                    <label>Horário</label>
+                    <input type="text" id="horario_abertura" placeholder="Ex: 19:30">
+                </div>
+            </div>
+
+            <label>Valor da Inscrição (Texto)</label>
+            <input type="text" id="valor_in" placeholder="Ex: R$ 50,00">
+
+            <label>Chave PIX (Para Copiar)</label>
+            <input type="text" id="pix_key" placeholder="CNPJ, Email ou Celular">
+
+            <div class="row">
+                <div class="col">
+                    <label>Cor Primária</label>
+                    <input type="color" id="cor_primaria">
+                </div>
+                <div class="col">
+                    <label>Cor do Fundo</label>
+                    <input type="color" id="cor_fundo_site">
+                </div>
+            </div>
+
+            <label>Link do Instagram</label>
+            <input type="text" id="instagram_link" placeholder="https://instagram.com/seu.user">
+
+            <label>Usuário do Instagram</label>
+            <input type="text" id="instagram_user" placeholder="Ex: @videirajatai">
+
+            <button class="btn btn-primary" id="btn-salvar" onclick="salvarEvento()">
+                <i class="fas fa-save"></i> Salvar Evento
+            </button>
+        </div>
+    </div>
+
+    <div id="toast"><i class="fas fa-check-circle"></i> Salvo com sucesso!</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // === CONFIGURAÇÃO DO SUPABASE ===
+        const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
+        const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let eventosLista = [];
+
+        // Inicia carregando a lista
+        carregarEventos();
+
+        async function carregarEventos() {
+            const select = document.getElementById('select-evento');
+            select.innerHTML = '<option value="">Carregando...</option>';
+
+            const { data, error } = await supabase
+                .from('eventos')
+                .select('*')
+                .order('id', { ascending: false }); // Traz os mais recentes primeiro
+
+            if (error) {
+                alert("Erro ao carregar eventos.");
+                console.error(error);
+                return;
+            }
+
+            eventosLista = data;
+            
+            if (eventosLista.length === 0) {
+                select.innerHTML = '<option value="">Nenhum evento criado</option>';
+            } else {
+                select.innerHTML = '<option value="">Selecione para editar...</option>';
+                eventosLista.forEach(ev => {
+                    let statusIcon = ev.status === 'Aberto' ? '🟢' : '🔴';
+                    select.innerHTML += `<option value="${ev.id}">${statusIcon} ${ev.nome_evento}</option>`;
+                });
+            }
+        }
+
+        function selecionarEvento() {
+            const select = document.getElementById('select-evento');
+            const idSelecionado = select.value;
+
+            if (!idSelecionado) {
+                document.getElementById('form-card').style.display = 'none';
+                return;
+            }
+
+            // Acha os dados do evento na lista carregada
+            const evento = eventosLista.find(ev => ev.id == idSelecionado);
+            
+            if (evento) {
+                preencherFormulario(evento);
+                document.getElementById('form-title').innerText = "Editar Evento: " + evento.nome_evento;
+                document.getElementById('form-card').style.display = 'block';
+            }
+        }
+
+        function prepararNovoEvento() {
+            document.getElementById('select-evento').value = ""; // Tira a seleção
+            
+            // Limpa todos os campos
+            const camposVazios = {
+                id: "", nome_evento: "", status: "Aberto", logo_url: "", local_nome: "",
+                data_texto: "", horario_abertura: "", valor_in: "", pix_key: "",
+                cor_primaria: "#5d10c1", cor_fundo_site: "#f4f4f4",
+                instagram_link: "", instagram_user: ""
+            };
+            
+            preencherFormulario(camposVazios);
+            document.getElementById('form-title').innerHTML = "<i class='fas fa-star'></i> Criar Novo Evento";
+            document.getElementById('form-card').style.display = 'block';
+            window.scrollTo({ top: document.getElementById('form-card').offsetTop, behavior: 'smooth' });
+        }
+
+        function preencherFormulario(dados) {
+            document.getElementById('evento-id').value = dados.id;
+            document.getElementById('nome_evento').value = dados.nome_evento;
+            document.getElementById('status').value = dados.status;
+            document.getElementById('logo_url').value = dados.logo_url;
+            document.getElementById('local_nome').value = dados.local_nome;
+            document.getElementById('data_texto').value = dados.data_texto;
+            document.getElementById('horario_abertura').value = dados.horario_abertura;
+            document.getElementById('valor_in').value = dados.valor_in;
+            document.getElementById('pix_key').value = dados.pix_key;
+            document.getElementById('cor_primaria').value = dados.cor_primaria;
+            document.getElementById('cor_fundo_site').value = dados.cor_fundo_site;
+            document.getElementById('instagram_link').value = dados.instagram_link;
+            document.getElementById('instagram_user').value = dados.instagram_user;
+        }
+
+        async function salvarEvento() {
+            const btn = document.getElementById('btn-salvar');
+            const id = document.getElementById('evento-id').value;
+            const nome = document.getElementById('nome_evento').value;
+
+            if (!nome) {
+                alert("O nome do evento é obrigatório!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+            // Coleta os dados digitados
+            const payload = {
+                nome_evento: nome,
+                status: document.getElementById('status').value,
+                logo_url: document.getElementById('logo_url').value,
+                local_nome: document.getElementById('local_nome').value,
+                data_texto: document.getElementById('data_texto').value,
+                horario_abertura: document.getElementById('horario_abertura').value,
+                valor_in: document.getElementById('valor_in').value,
+                pix_key: document.getElementById('pix_key').value,
+                cor_primaria: document.getElementById('cor_primaria').value,
+                cor_fundo_site: document.getElementById('cor_fundo_site').value,
+                instagram_link: document.getElementById('instagram_link').value,
+                instagram_user: document.getElementById('instagram_user').value
+            };
+
+            let erroAoSalvar = null;
+
+            if (id) {
+                // UPDATE: Se tem ID, está editando um evento existente
+                const { error } = await supabase.from('eventos').update(payload).eq('id', id);
+                erroAoSalvar = error;
+            } else {
+                // INSERT: Se não tem ID, é um evento novo
+                const { error } = await supabase.from('eventos').insert([payload]);
+                erroAoSalvar = error;
+            }
+
+            if (erroAoSalvar) {
+                alert("Erro ao salvar: " + erroAoSalvar.message);
+                console.error(erroAoSalvar);
+            } else {
+                mostrarToast();
+                await carregarEventos(); // Recarrega a lista
+                
+                // Se foi um evento novo, esconde o formulário para limpar a tela
+                if (!id) {
+                    document.getElementById('form-card').style.display = 'none';
+                }
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Salvar Evento';
+        }
+
+        function mostrarToast() {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+    </script>
+</body>
+</html>
