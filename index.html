@@ -153,46 +153,59 @@
         // === CONFIGURAÇÃO DO SUPABASE ===
         const supabaseUrl = 'https://qnoariybaxwnrtmqhyjz.supabase.co';
         const supabaseKey = 'sb_publishable_2Qr_p8EeTszIZisuDwfkQw_5Lcuf-Bs';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        // Nome corrigido para evitar o erro de SyntaxError
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        let chavePixGlobal = ""; // Guarda a chave pix vinda do banco
+        let chavePixGlobal = ""; 
+        let eventoIdGlobal = null; // Guardamos o ID do evento atual para salvar na inscrição
 
-        // === CARREGAR CONFIGURAÇÕES DO EVENTO AO ABRIR A PÁGINA ===
+        // === CARREGAR CONFIGURAÇÕES DO EVENTO ABERTO ===
         async function carregarConfiguracoes() {
-            // Puxa a primeira linha da tabela 'config'
-            const { data, error } = await supabase.from('config').select('*').limit(1).single();
+            // Puxa apenas o último evento que estiver com status 'Aberto'
+            const { data, error } = await supabaseClient
+                .from('eventos')
+                .select('*')
+                .eq('status', 'Aberto')
+                .order('id', { ascending: false })
+                .limit(1)
+                .single();
             
-            if (data) {
-                // Atualiza Variáveis CSS (Cores)
-                document.documentElement.style.setProperty('--primary', data.cor_primaria);
-                document.documentElement.style.setProperty('--bg-color', data.cor_fundo_site);
-                
-                // Atualiza Textos
-                document.title = data.nome_evento;
-                document.getElementById('cfg-nome-evento').innerText = data.nome_evento;
-                document.getElementById('cfg-local').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.local_nome}`;
-                document.getElementById('cfg-data').innerHTML = `<i class="fas fa-calendar-alt"></i> ${data.data_texto}`;
-                document.getElementById('cfg-horario').innerHTML = `<i class="far fa-clock"></i> ${data.horario_abertura}`;
-                document.getElementById('cfg-valor').innerText = data.valor_in;
-                
-                // Atualiza Imagem
-                const logo = document.getElementById('cfg-logo');
-                logo.src = data.logo_url;
-                logo.style.display = 'inline-block';
-
-                // PIX
-                chavePixGlobal = data.pix_key;
-                document.getElementById('textoPix').innerText = data.pix_key;
-
-                // Instagram
-                document.getElementById('cfg-insta-link').href = data.instagram_link;
-                document.getElementById('cfg-insta-user').innerText = data.instagram_user;
-            } else {
-                console.error("Erro ao carregar configurações ou tabela vazia", error);
+            if (error || !data) {
+                // Se não achou nenhum evento 'Aberto', manda para a tela de encerrado!
+                console.log("Nenhum evento aberto encontrado. Redirecionando...");
+                window.location.replace("tela.html");
+                return;
             }
+
+            // Salva o ID do evento para usar na hora de enviar o formulário
+            eventoIdGlobal = data.id;
+
+            // Atualiza Variáveis CSS (Cores)
+            document.documentElement.style.setProperty('--primary', data.cor_primaria);
+            document.documentElement.style.setProperty('--bg-color', data.cor_fundo_site);
+            
+            // Atualiza Textos
+            document.title = data.nome_evento;
+            document.getElementById('cfg-nome-evento').innerText = data.nome_evento;
+            document.getElementById('cfg-local').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.local_nome}`;
+            document.getElementById('cfg-data').innerHTML = `<i class="fas fa-calendar-alt"></i> ${data.data_texto}`;
+            document.getElementById('cfg-horario').innerHTML = `<i class="far fa-clock"></i> ${data.horario_abertura}`;
+            document.getElementById('cfg-valor').innerText = data.valor_in;
+            
+            // Atualiza Imagem
+            const logo = document.getElementById('cfg-logo');
+            logo.src = data.logo_url;
+            logo.style.display = 'inline-block';
+
+            // PIX
+            chavePixGlobal = data.pix_key;
+            document.getElementById('textoPix').innerText = data.pix_key;
+
+            // Instagram
+            document.getElementById('cfg-insta-link').href = data.instagram_link;
+            document.getElementById('cfg-insta-user').innerText = data.instagram_user;
         }
 
-        // Chama a função assim que a tela abre
         carregarConfiguracoes();
 
         // === COMPORTAMENTO DO ARQUIVO ===
@@ -253,6 +266,11 @@
                 return;
             }
 
+            if (!eventoIdGlobal) {
+                alert("Erro: O evento não foi carregado corretamente.");
+                return;
+            }
+
             const textoOriginal = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
@@ -262,26 +280,27 @@
                 const formData = new FormData(this);
                 const file = fileInput.files[0];
 
-                // 1. Upload do Arquivo para o Storage do Supabase
+                // 1. Upload do Arquivo para o Storage
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
                     .from('comprovantes')
                     .upload(fileName, file);
 
                 if (uploadError) throw new Error("Erro ao fazer upload do comprovante.");
 
                 // 2. Pegar a URL pública da imagem
-                const { data: publicUrlData } = supabase.storage
+                const { data: publicUrlData } = supabaseClient.storage
                     .from('comprovantes')
                     .getPublicUrl(fileName);
 
-                // 3. Salvar os dados na tabela 'inscricoes'
-                const { error: insertError } = await supabase
+                // 3. Salvar os dados na tabela 'inscricoes' (AGORA INCLUINDO O EVENTO_ID)
+                const { error: insertError } = await supabaseClient
                     .from('inscricoes')
                     .insert([
                         {
+                            evento_id: eventoIdGlobal, // <--- Conectando a inscrição ao evento!
                             nome_completo: formData.get('nomeCompleto'),
                             telefone: formData.get('telefone'),
                             email: email,
@@ -290,7 +309,7 @@
                         }
                     ]);
 
-                if (insertError) throw new Error("Erro ao salvar dados da inscrição.");
+                if (insertError) throw new Error("Erro ao salvar dados da inscrição no banco.");
 
                 // Sucesso
                 msg.className = 'msg success';
